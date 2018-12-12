@@ -1,0 +1,12 @@
+{
+    "namespace": "model",
+    "name": "TweetKey",
+    "type": "record",
+    "fields": [
+        {
+            "name": "key",
+            "type": "int",
+            "doc" : "To partition each tweet in a repository"
+        }
+    ]
+}
