@@ -8,7 +8,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +25,7 @@ class TweetProducer {
         this.producer.send(record);
     }
 
-    void close() {
+    void stop() {
         producer.flush();
         producer.close(1, TimeUnit.SECONDS);
     }
@@ -41,26 +40,5 @@ class TweetProducer {
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
 
         return new KafkaProducer<>(props);
-    }
-
-    public static void main(String [] args) {
-        TweetProducer producer = new TweetProducer();
-        Random random = new Random();
-        String [] hashtags = {"porcodio", "diocane", "baresi", "stronzo", "frigeri", "frocio"};
-
-        for (int i = 0; i < 100; i++) {
-            int h = random.nextInt(Integer.MAX_VALUE)%hashtags.length, j = random.nextInt(Integer.MAX_VALUE)%hashtags.length;
-            TweetKey key = new TweetKey(0);
-            TweetValue value = new TweetValue(
-                    "Contenuto inutile: " + hashtags[h] + " " + hashtags[j],
-                    random.nextInt()%10,
-                    (int) (System.currentTimeMillis()/1000L),
-                    "Politecnico Cremona",
-                    Arrays.asList(hashtags[h], hashtags[j]),
-                    Arrays.asList(random.nextInt()%10, random.nextInt()%10)
-            );
-            producer.produce("tweets", key, value);
-        }
-        producer.close();
     }
 }

@@ -20,25 +20,52 @@ class TweetConsumer {
     private String topic;
     private KafkaConsumer<TweetKey, TweetValue> consumer;
     private TweetDAO tweetDAO;
+    private volatile boolean running;
 
     TweetConsumer(String topic) {
         this.topic = topic;
         this.consumer = createConsumer();
         this.tweetDAO = new TweetDAO();
+        this.running = false;
     }
 
-    ConsumerRecords<TweetKey, TweetValue> consume() {
-        return consumer.poll(Duration.ofMillis(100));
+    void consume() {
+        setUp();
+        while (running) {
+            ConsumerRecords<TweetKey, TweetValue> records = consumer.poll(Duration.ofMillis(100));
+            List<TweetValue> tweets = new ArrayList<>();
+
+            for (TopicPartition partition : records.partitions()) {
+                List<ConsumerRecord<TweetKey, TweetValue>> partitionRecords = records.records(partition);
+                for (ConsumerRecord<TweetKey, TweetValue> record : partitionRecords) {
+                    tweets.add(record.value());
+                    System.out.println(record.offset() + ": " + record.value());
+                }
+                long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+                tweetDAO.persists(tweets, lastOffset + 1);
+                consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+            }
+        }
+        tearDown();
     }
 
     void start() {
+        this.running = true;
+        new Thread(this::consume).start();
+    }
+
+    void stop() {
+        this.running = false;
+    }
+
+    private void setUp() {
         this.consumer.subscribe(Collections.singletonList(topic));
         long offset = tweetDAO.getOffset();
         consumer.poll(1);
         consumer.assignment().forEach(topicPartition -> consumer.seek(topicPartition, offset));
     }
 
-    void stop() {
+    private void tearDown() {
         this.consumer.close();
     }
 
@@ -56,27 +83,6 @@ class TweetConsumer {
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 
-
         return new KafkaConsumer<>(props);
-    }
-
-    public static void main(String[] args) {
-        TweetConsumer consumer = new TweetConsumer("tweets");
-        consumer.start();
-        while (true) {
-            ConsumerRecords<TweetKey, TweetValue> records = consumer.consume();
-            List<TweetValue> tweets = new ArrayList<>();
-
-            for (TopicPartition partition : records.partitions()) {
-                List<ConsumerRecord<TweetKey, TweetValue>> partitionRecords = records.records(partition);
-                for (ConsumerRecord<TweetKey, TweetValue> record : partitionRecords) {
-                    tweets.add(record.value());
-                    System.out.println(partition.toString() + " " + record.offset() + ": " + record.value());
-                }
-                long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
-                consumer.tweetDAO.persists(tweets, lastOffset + 1);
-                consumer.consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
-            }
-        }
     }
 }
