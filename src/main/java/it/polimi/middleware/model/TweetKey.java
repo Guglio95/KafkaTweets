@@ -3,7 +3,7 @@
  *
  * DO NOT EDIT DIRECTLY
  */
-package model;
+package it.polimi.middleware.model;
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.message.BinaryMessageEncoder;
@@ -13,8 +13,8 @@ import org.apache.avro.message.SchemaStore;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -8842491968547888978L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetKey\",\"namespace\":\"model\",\"fields\":[{\"name\":\"key\",\"type\":\"int\",\"doc\":\"To partition each tweet in a repository\"}]}");
+  private static final long serialVersionUID = -3492355790611140861L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetKey\",\"namespace\":\"it.polimi.middleware.model\",\"fields\":[{\"name\":\"key\",\"type\":\"int\",\"doc\":\"To partition each tweet in a repository\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -108,8 +108,8 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
    * Creates a new TweetKey RecordBuilder.
    * @return A new TweetKey RecordBuilder
    */
-  public static model.TweetKey.Builder newBuilder() {
-    return new model.TweetKey.Builder();
+  public static it.polimi.middleware.model.TweetKey.Builder newBuilder() {
+    return new it.polimi.middleware.model.TweetKey.Builder();
   }
 
   /**
@@ -117,8 +117,8 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing builder to copy.
    * @return A new TweetKey RecordBuilder
    */
-  public static model.TweetKey.Builder newBuilder(model.TweetKey.Builder other) {
-    return new model.TweetKey.Builder(other);
+  public static it.polimi.middleware.model.TweetKey.Builder newBuilder(it.polimi.middleware.model.TweetKey.Builder other) {
+    return new it.polimi.middleware.model.TweetKey.Builder(other);
   }
 
   /**
@@ -126,8 +126,8 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing instance to copy.
    * @return A new TweetKey RecordBuilder
    */
-  public static model.TweetKey.Builder newBuilder(model.TweetKey other) {
-    return new model.TweetKey.Builder(other);
+  public static it.polimi.middleware.model.TweetKey.Builder newBuilder(it.polimi.middleware.model.TweetKey other) {
+    return new it.polimi.middleware.model.TweetKey.Builder(other);
   }
 
   /**
@@ -148,7 +148,7 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(model.TweetKey.Builder other) {
+    private Builder(it.polimi.middleware.model.TweetKey.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -160,7 +160,7 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
      * Creates a Builder by copying an existing TweetKey instance
      * @param other The existing instance to copy.
      */
-    private Builder(model.TweetKey other) {
+    private Builder(it.polimi.middleware.model.TweetKey other) {
             super(SCHEMA$);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -183,7 +183,7 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'key'.
       * @return This builder.
       */
-    public model.TweetKey.Builder setKey(int value) {
+    public it.polimi.middleware.model.TweetKey.Builder setKey(int value) {
       validate(fields()[0], value);
       this.key = value;
       fieldSetFlags()[0] = true;
@@ -205,7 +205,7 @@ public class TweetKey extends org.apache.avro.specific.SpecificRecordBase implem
       * To partition each tweet in a repository
       * @return This builder.
       */
-    public model.TweetKey.Builder clearKey() {
+    public it.polimi.middleware.model.TweetKey.Builder clearKey() {
       fieldSetFlags()[0] = false;
       return this;
     }

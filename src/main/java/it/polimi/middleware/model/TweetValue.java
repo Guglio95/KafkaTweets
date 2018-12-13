@@ -3,7 +3,7 @@
  *
  * DO NOT EDIT DIRECTLY
  */
-package model;
+package it.polimi.middleware.model;
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.message.BinaryMessageEncoder;
@@ -13,8 +13,8 @@ import org.apache.avro.message.SchemaStore;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class TweetValue extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 5687806148301763312L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetValue\",\"namespace\":\"model\",\"fields\":[{\"name\":\"content\",\"type\":\"string\",\"doc\":\"The content of the tweet\"},{\"name\":\"authorId\",\"type\":\"int\",\"doc\":\"Identifies the author of the tweet\"},{\"name\":\"timestamp\",\"type\":\"int\",\"doc\":\"The time of creation of the tweet\",\"logicalType\":\"timestamp-millis\"},{\"name\":\"location\",\"type\":\"string\",\"doc\":\"The location of the tweet\"},{\"name\":\"tags\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"doc\":\"Tags associated to this tweet\"},{\"name\":\"mentions\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"doc\":\"Ids of Users mentioned in this tweet\"}]}");
+  private static final long serialVersionUID = 6342547214090481648L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetValue\",\"namespace\":\"it.polimi.middleware.model\",\"fields\":[{\"name\":\"content\",\"type\":\"string\",\"doc\":\"The content of the tweet\"},{\"name\":\"authorId\",\"type\":\"int\",\"doc\":\"Identifies the author of the tweet\"},{\"name\":\"timestamp\",\"type\":\"int\",\"doc\":\"The time of creation of the tweet\",\"logicalType\":\"timestamp-millis\"},{\"name\":\"location\",\"type\":\"string\",\"doc\":\"The location of the tweet\"},{\"name\":\"tags\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"doc\":\"Tags associated to this tweet\"},{\"name\":\"mentions\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"doc\":\"Ids of Users mentioned in this tweet\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -223,8 +223,8 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * Creates a new TweetValue RecordBuilder.
    * @return A new TweetValue RecordBuilder
    */
-  public static model.TweetValue.Builder newBuilder() {
-    return new model.TweetValue.Builder();
+  public static it.polimi.middleware.model.TweetValue.Builder newBuilder() {
+    return new it.polimi.middleware.model.TweetValue.Builder();
   }
 
   /**
@@ -232,8 +232,8 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * @param other The existing builder to copy.
    * @return A new TweetValue RecordBuilder
    */
-  public static model.TweetValue.Builder newBuilder(model.TweetValue.Builder other) {
-    return new model.TweetValue.Builder(other);
+  public static it.polimi.middleware.model.TweetValue.Builder newBuilder(it.polimi.middleware.model.TweetValue.Builder other) {
+    return new it.polimi.middleware.model.TweetValue.Builder(other);
   }
 
   /**
@@ -241,8 +241,8 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * @param other The existing instance to copy.
    * @return A new TweetValue RecordBuilder
    */
-  public static model.TweetValue.Builder newBuilder(model.TweetValue other) {
-    return new model.TweetValue.Builder(other);
+  public static it.polimi.middleware.model.TweetValue.Builder newBuilder(it.polimi.middleware.model.TweetValue other) {
+    return new it.polimi.middleware.model.TweetValue.Builder(other);
   }
 
   /**
@@ -273,7 +273,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(model.TweetValue.Builder other) {
+    private Builder(it.polimi.middleware.model.TweetValue.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.content)) {
         this.content = data().deepCopy(fields()[0].schema(), other.content);
@@ -305,7 +305,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
      * Creates a Builder by copying an existing TweetValue instance
      * @param other The existing instance to copy.
      */
-    private Builder(model.TweetValue other) {
+    private Builder(it.polimi.middleware.model.TweetValue other) {
             super(SCHEMA$);
       if (isValidValue(fields()[0], other.content)) {
         this.content = data().deepCopy(fields()[0].schema(), other.content);
@@ -348,7 +348,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'content'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setContent(java.lang.CharSequence value) {
+    public it.polimi.middleware.model.TweetValue.Builder setContent(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.content = value;
       fieldSetFlags()[0] = true;
@@ -370,7 +370,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * The content of the tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearContent() {
+    public it.polimi.middleware.model.TweetValue.Builder clearContent() {
       content = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -391,7 +391,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'authorId'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setAuthorId(int value) {
+    public it.polimi.middleware.model.TweetValue.Builder setAuthorId(int value) {
       validate(fields()[1], value);
       this.authorId = value;
       fieldSetFlags()[1] = true;
@@ -413,7 +413,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * Identifies the author of the tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearAuthorId() {
+    public it.polimi.middleware.model.TweetValue.Builder clearAuthorId() {
       fieldSetFlags()[1] = false;
       return this;
     }
@@ -433,7 +433,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'timestamp'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setTimestamp(int value) {
+    public it.polimi.middleware.model.TweetValue.Builder setTimestamp(int value) {
       validate(fields()[2], value);
       this.timestamp = value;
       fieldSetFlags()[2] = true;
@@ -455,7 +455,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * The time of creation of the tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearTimestamp() {
+    public it.polimi.middleware.model.TweetValue.Builder clearTimestamp() {
       fieldSetFlags()[2] = false;
       return this;
     }
@@ -475,7 +475,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'location'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setLocation(java.lang.CharSequence value) {
+    public it.polimi.middleware.model.TweetValue.Builder setLocation(java.lang.CharSequence value) {
       validate(fields()[3], value);
       this.location = value;
       fieldSetFlags()[3] = true;
@@ -497,7 +497,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * The location of the tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearLocation() {
+    public it.polimi.middleware.model.TweetValue.Builder clearLocation() {
       location = null;
       fieldSetFlags()[3] = false;
       return this;
@@ -518,7 +518,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'tags'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setTags(java.util.List<java.lang.CharSequence> value) {
+    public it.polimi.middleware.model.TweetValue.Builder setTags(java.util.List<java.lang.CharSequence> value) {
       validate(fields()[4], value);
       this.tags = value;
       fieldSetFlags()[4] = true;
@@ -540,7 +540,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * Tags associated to this tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearTags() {
+    public it.polimi.middleware.model.TweetValue.Builder clearTags() {
       tags = null;
       fieldSetFlags()[4] = false;
       return this;
@@ -561,7 +561,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'mentions'.
       * @return This builder.
       */
-    public model.TweetValue.Builder setMentions(java.util.List<java.lang.Integer> value) {
+    public it.polimi.middleware.model.TweetValue.Builder setMentions(java.util.List<java.lang.Integer> value) {
       validate(fields()[5], value);
       this.mentions = value;
       fieldSetFlags()[5] = true;
@@ -583,7 +583,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * Ids of Users mentioned in this tweet
       * @return This builder.
       */
-    public model.TweetValue.Builder clearMentions() {
+    public it.polimi.middleware.model.TweetValue.Builder clearMentions() {
       mentions = null;
       fieldSetFlags()[5] = false;
       return this;

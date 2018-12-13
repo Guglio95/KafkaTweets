@@ -1,5 +1,5 @@
 {
-    "namespace": "model",
+    "namespace": "it.polimi.middleware.model",
     "name": "TweetKey",
     "type": "record",
     "fields": [
