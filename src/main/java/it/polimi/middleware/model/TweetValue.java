@@ -14,7 +14,7 @@ import org.apache.avro.message.SchemaStore;
 @org.apache.avro.specific.AvroGenerated
 public class TweetValue extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   private static final long serialVersionUID = 6342547214090481648L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetValue\",\"namespace\":\"it.polimi.middleware.model\",\"fields\":[{\"name\":\"content\",\"type\":\"string\",\"doc\":\"The content of the tweet\"},{\"name\":\"authorId\",\"type\":\"int\",\"doc\":\"Identifies the author of the tweet\"},{\"name\":\"timestamp\",\"type\":\"int\",\"doc\":\"The time of creation of the tweet\",\"logicalType\":\"timestamp-millis\"},{\"name\":\"location\",\"type\":\"string\",\"doc\":\"The location of the tweet\"},{\"name\":\"tags\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"doc\":\"Tags associated to this tweet\"},{\"name\":\"mentions\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"doc\":\"Ids of Users mentioned in this tweet\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TweetValue\",\"namespace\":\"it.polimi.middleware.model\",\"fields\":[{\"name\":\"content\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The content of the tweet\"},{\"name\":\"authorId\",\"type\":\"int\",\"doc\":\"Identifies the author of the tweet\"},{\"name\":\"timestamp\",\"type\":\"int\",\"doc\":\"The time of creation of the tweet\",\"logicalType\":\"timestamp-millis\"},{\"name\":\"location\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The location of the tweet\"},{\"name\":\"tags\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},\"doc\":\"Tags associated to this tweet\"},{\"name\":\"mentions\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"doc\":\"Ids of Users mentioned in this tweet\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -52,15 +52,15 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
   }
 
   /** The content of the tweet */
-  @Deprecated public java.lang.CharSequence content;
+  @Deprecated public java.lang.String content;
   /** Identifies the author of the tweet */
   @Deprecated public int authorId;
   /** The time of creation of the tweet */
   @Deprecated public int timestamp;
   /** The location of the tweet */
-  @Deprecated public java.lang.CharSequence location;
+  @Deprecated public java.lang.String location;
   /** Tags associated to this tweet */
-  @Deprecated public java.util.List<java.lang.CharSequence> tags;
+  @Deprecated public java.util.List<java.lang.String> tags;
   /** Ids of Users mentioned in this tweet */
   @Deprecated public java.util.List<java.lang.Integer> mentions;
 
@@ -80,7 +80,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * @param tags Tags associated to this tweet
    * @param mentions Ids of Users mentioned in this tweet
    */
-  public TweetValue(java.lang.CharSequence content, java.lang.Integer authorId, java.lang.Integer timestamp, java.lang.CharSequence location, java.util.List<java.lang.CharSequence> tags, java.util.List<java.lang.Integer> mentions) {
+  public TweetValue(java.lang.String content, java.lang.Integer authorId, java.lang.Integer timestamp, java.lang.String location, java.util.List<java.lang.String> tags, java.util.List<java.lang.Integer> mentions) {
     this.content = content;
     this.authorId = authorId;
     this.timestamp = timestamp;
@@ -107,11 +107,11 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: content = (java.lang.CharSequence)value$; break;
+    case 0: content = (java.lang.String)value$; break;
     case 1: authorId = (java.lang.Integer)value$; break;
     case 2: timestamp = (java.lang.Integer)value$; break;
-    case 3: location = (java.lang.CharSequence)value$; break;
-    case 4: tags = (java.util.List<java.lang.CharSequence>)value$; break;
+    case 3: location = (java.lang.String)value$; break;
+    case 4: tags = (java.util.List<java.lang.String>)value$; break;
     case 5: mentions = (java.util.List<java.lang.Integer>)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
@@ -121,7 +121,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'content' field.
    * @return The content of the tweet
    */
-  public java.lang.CharSequence getContent() {
+  public java.lang.String getContent() {
     return content;
   }
 
@@ -130,7 +130,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * The content of the tweet
    * @param value the value to set.
    */
-  public void setContent(java.lang.CharSequence value) {
+  public void setContent(java.lang.String value) {
     this.content = value;
   }
 
@@ -172,7 +172,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'location' field.
    * @return The location of the tweet
    */
-  public java.lang.CharSequence getLocation() {
+  public java.lang.String getLocation() {
     return location;
   }
 
@@ -181,7 +181,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * The location of the tweet
    * @param value the value to set.
    */
-  public void setLocation(java.lang.CharSequence value) {
+  public void setLocation(java.lang.String value) {
     this.location = value;
   }
 
@@ -189,7 +189,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'tags' field.
    * @return Tags associated to this tweet
    */
-  public java.util.List<java.lang.CharSequence> getTags() {
+  public java.util.List<java.lang.String> getTags() {
     return tags;
   }
 
@@ -198,7 +198,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
    * Tags associated to this tweet
    * @param value the value to set.
    */
-  public void setTags(java.util.List<java.lang.CharSequence> value) {
+  public void setTags(java.util.List<java.lang.String> value) {
     this.tags = value;
   }
 
@@ -252,15 +252,15 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
     implements org.apache.avro.data.RecordBuilder<TweetValue> {
 
     /** The content of the tweet */
-    private java.lang.CharSequence content;
+    private java.lang.String content;
     /** Identifies the author of the tweet */
     private int authorId;
     /** The time of creation of the tweet */
     private int timestamp;
     /** The location of the tweet */
-    private java.lang.CharSequence location;
+    private java.lang.String location;
     /** Tags associated to this tweet */
-    private java.util.List<java.lang.CharSequence> tags;
+    private java.util.List<java.lang.String> tags;
     /** Ids of Users mentioned in this tweet */
     private java.util.List<java.lang.Integer> mentions;
 
@@ -338,7 +338,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * The content of the tweet
       * @return The value.
       */
-    public java.lang.CharSequence getContent() {
+    public java.lang.String getContent() {
       return content;
     }
 
@@ -348,7 +348,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'content'.
       * @return This builder.
       */
-    public it.polimi.middleware.model.TweetValue.Builder setContent(java.lang.CharSequence value) {
+    public it.polimi.middleware.model.TweetValue.Builder setContent(java.lang.String value) {
       validate(fields()[0], value);
       this.content = value;
       fieldSetFlags()[0] = true;
@@ -465,7 +465,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * The location of the tweet
       * @return The value.
       */
-    public java.lang.CharSequence getLocation() {
+    public java.lang.String getLocation() {
       return location;
     }
 
@@ -475,7 +475,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'location'.
       * @return This builder.
       */
-    public it.polimi.middleware.model.TweetValue.Builder setLocation(java.lang.CharSequence value) {
+    public it.polimi.middleware.model.TweetValue.Builder setLocation(java.lang.String value) {
       validate(fields()[3], value);
       this.location = value;
       fieldSetFlags()[3] = true;
@@ -508,7 +508,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * Tags associated to this tweet
       * @return The value.
       */
-    public java.util.List<java.lang.CharSequence> getTags() {
+    public java.util.List<java.lang.String> getTags() {
       return tags;
     }
 
@@ -518,7 +518,7 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'tags'.
       * @return This builder.
       */
-    public it.polimi.middleware.model.TweetValue.Builder setTags(java.util.List<java.lang.CharSequence> value) {
+    public it.polimi.middleware.model.TweetValue.Builder setTags(java.util.List<java.lang.String> value) {
       validate(fields()[4], value);
       this.tags = value;
       fieldSetFlags()[4] = true;
@@ -594,11 +594,11 @@ public class TweetValue extends org.apache.avro.specific.SpecificRecordBase impl
     public TweetValue build() {
       try {
         TweetValue record = new TweetValue();
-        record.content = fieldSetFlags()[0] ? this.content : (java.lang.CharSequence) defaultValue(fields()[0]);
+        record.content = fieldSetFlags()[0] ? this.content : (java.lang.String) defaultValue(fields()[0]);
         record.authorId = fieldSetFlags()[1] ? this.authorId : (java.lang.Integer) defaultValue(fields()[1]);
         record.timestamp = fieldSetFlags()[2] ? this.timestamp : (java.lang.Integer) defaultValue(fields()[2]);
-        record.location = fieldSetFlags()[3] ? this.location : (java.lang.CharSequence) defaultValue(fields()[3]);
-        record.tags = fieldSetFlags()[4] ? this.tags : (java.util.List<java.lang.CharSequence>) defaultValue(fields()[4]);
+        record.location = fieldSetFlags()[3] ? this.location : (java.lang.String) defaultValue(fields()[3]);
+        record.tags = fieldSetFlags()[4] ? this.tags : (java.util.List<java.lang.String>) defaultValue(fields()[4]);
         record.mentions = fieldSetFlags()[5] ? this.mentions : (java.util.List<java.lang.Integer>) defaultValue(fields()[5]);
         return record;
       } catch (java.lang.Exception e) {

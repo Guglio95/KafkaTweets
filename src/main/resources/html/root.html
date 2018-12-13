@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kafka Twitter</title>
+</head>
+<body>
+    <form>
+        Content:<br>
+        <input type="text" id="content"><br>
+        Hashtags:<br>
+        <input type="text" id="hashtags" placeholder="#hastag1 #hashtag2 #hashtag3 ..."><br>
+        Mentions:<br>
+        <input type="text" id="mentions" placeholder="@1 @2 @3 ..."><br>
+        Location:<br>
+        <input type="text" id="location"><br><br>
+        <input type="submit" value="Post" id="post">
+    </form>
+</body>
+</html>
+
+<script type="text/javascript">
+    post.addEventListener('click', function(e) {
+        e.preventDefault();
+        var tweet = {
+            "content": document.getElementById('content').value,
+            "authorID": "0",
+            "timestamp": "0",
+            "tags": document.getElementById('hashtags').value.split(" ").map(function (x) { return x.substr(1); }),
+            "mentions": document.getElementById('mentions').value.split(" ").map(function (x) { return x.substr(1); }),
+            "location": document.getElementById('location').value
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/tweets', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 201) {
+                alert("ok");
+            }
+        };
+        var data = JSON.stringify(tweet);
+        xhr.send(data);
+    });
+</script>

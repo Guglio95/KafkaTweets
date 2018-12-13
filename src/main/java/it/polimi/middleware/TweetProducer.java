@@ -6,13 +6,11 @@ import it.polimi.middleware.model.TweetValue;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 class TweetProducer {
-    private static final Logger logger = Logger.getLogger(TweetProducer.class);
 
     private KafkaProducer<TweetKey, TweetValue> producer;
 

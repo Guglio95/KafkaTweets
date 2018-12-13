@@ -6,7 +6,6 @@ import it.polimi.middleware.model.TweetKey;
 import it.polimi.middleware.model.TweetValue;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.log4j.Logger;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 
 class TweetConsumer {
-    private static final Logger logger = Logger.getLogger(TweetConsumer.class);
 
     private String topic;
     private KafkaConsumer<TweetKey, TweetValue> consumer;
