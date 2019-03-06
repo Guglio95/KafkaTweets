@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 class TweetConsumer {
     private static final Logger logger = Logger.getLogger(TweetConsumer.class);
 
+    private final String kafka1_URL;
     private String topic;
     private TweetPersistance tweetPersistance;
     private SlidingWindow slidingWindow;
@@ -23,7 +24,8 @@ class TweetConsumer {
     private Gson gson = new Gson();
     private Queue<TweetObserver> observers = new ConcurrentLinkedQueue<>();
 
-    TweetConsumer(String topic) {
+    TweetConsumer(String kafka1_URL, String topic) {
+        this.kafka1_URL = kafka1_URL;
         this.tweetPersistance = new TweetPersistance(topic);
         this.slidingWindow = new SlidingWindow(5);
         this.topic = topic;
@@ -120,7 +122,7 @@ class TweetConsumer {
 
     private KafkaConsumer<String, String> createKafkaConsumer() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka1_URL);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "consgroup1");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 

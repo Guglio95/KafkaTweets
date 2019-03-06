@@ -15,11 +15,12 @@ class TweetProducer {
     private static final Logger logger = Logger.getLogger(TweetProducer.class);
 
     private KafkaProducer<String, String> producer;
-    private Gson gson;
+    private Gson gson = new Gson();
+    private final String kafka1_URL;
 
-    TweetProducer() {
+    TweetProducer(String kafka1_URL) {
+        this.kafka1_URL = kafka1_URL;
         this.producer = createProducer();
-        this.gson = new Gson();
     }
 
     private void produce(String topic, Long key, TweetValue value) {
@@ -41,7 +42,7 @@ class TweetProducer {
 
     private KafkaProducer<String, String> createProducer() {
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka1_URL);
 
 //        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 //        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);

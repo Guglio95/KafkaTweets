@@ -26,10 +26,10 @@ public class WebServer {
 
     public void start() {
         webSocket("/tweets/ws", new WebSocketController(consumersOrchestrator));
-        staticFiles.location("/");
+        staticFiles.location("html");
 
         get("", (request, response) -> {
-            response.redirect("index.html");
+            response.redirect("html/index.html");
             return null;
         });
 
