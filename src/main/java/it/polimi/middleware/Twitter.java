@@ -1,23 +1,20 @@
 package it.polimi.middleware;
 
-import com.google.gson.Gson;
 
-import static spark.Spark.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 public class Twitter {
-    private static final String TOPIC = "tweets";
-    private static final TweetConsumer consumer = new TweetConsumer(TOPIC);
-    private static final TweetProducer producer = new TweetProducer();
 
-    public static void main(String [] args) {
-        Gson gson = new Gson();
-        staticFiles.location("/");
+    public static void main(String[] args) {
+        Logger.getRootLogger().setLevel(Level.INFO);
 
-        path("/", () -> {
-            get("", (request, response) -> {
-                response.redirect("root.html");
-                return null;
-            });
-        });
+        //Create dependencies
+        final TweetProducer tweetsProducer = new TweetProducer();//A single producer can write to any queue
+        ConsumersOrchestrator consumersOrchestrator = new ConsumersOrchestrator();//A consumer can only listen to a queue.
+        WebServer webServer = new WebServer(consumersOrchestrator, tweetsProducer);
+
+        //Start webserver
+        webServer.start();
     }
 }

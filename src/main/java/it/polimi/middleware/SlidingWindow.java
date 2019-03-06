@@ -24,7 +24,7 @@ public class SlidingWindow {
             if (this.window[key] == null)
                 this.window[key] = new ArrayList<>();
 
-            this.window[key].add(0, event);
+            this.window[key].add(0, event);//Append last received event.
             this.lastKeyWritten = key;
             lastTimestamp = event.getTimestamp();
         }
@@ -37,11 +37,11 @@ public class SlidingWindow {
             this.lastKeyWritten = key;
             lastTimestamp = event.getTimestamp();
         }
-        //If the minute is not the same because is in the future
+        //If the minute is not the same because it's in the future
         else if (event.getTimestamp() >= lastTimestamp) {
 
-            //Delete previous stored tweets from "lastWrittenKey" to the key that will now been written.
-            //Example:  if last time we wrote to key "2" and now we should write to key "4" this for wille empty
+            //Delete previous stored tweets from "lastWrittenKey" to the key that will now be written.
+            //Example:  if last time we wrote to key "2" and now we should write to key "4" this for will empty
             //          the array position 3
             //Example2: if last time we wrote to key "4" and now we should write to key "3" (assuming window = 5)
             //          this for will empty array position 1,2
@@ -56,7 +56,7 @@ public class SlidingWindow {
             this.lastKeyWritten = key;
             this.lastTimestamp = event.getTimestamp();
         } else if (event.getTimestamp() < lastTimestamp) {
-            //Out of sequence, ignore sequence.
+            //Out of sequence, ignore element.
         }
     }
 

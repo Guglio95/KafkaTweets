@@ -2,6 +2,7 @@ package it.polimi.middleware.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class TweetValue implements TimestampedEvent {
     private String author;
@@ -24,6 +25,24 @@ public class TweetValue implements TimestampedEvent {
                 "author='" + author + '\'' +
                 ", content='" + content + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TweetValue that = (TweetValue) o;
+        return timestamp == that.timestamp &&
+                Objects.equals(author, that.author) &&
+                Objects.equals(content, that.content) &&
+                Objects.equals(location, that.location) &&
+                Objects.equals(tags, that.tags) &&
+                Objects.equals(mentions, that.mentions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(author, content, timestamp, location, tags, mentions);
     }
 
     public String getAuthor() {

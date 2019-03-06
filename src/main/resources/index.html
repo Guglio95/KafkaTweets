@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kafka Tweetz</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="./dist/jquery-tagsinput.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css"/>
+
+    <style>
+        /* Show it is fixed to the top */
+        body {
+            min-height: 75rem;
+            padding-top: 4.5rem;
+            font-size: 1.15rem;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+
+    </style>
+</head>
+
+<body style="min-height: 0px;">
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
+    <a class="navbar-brand" href="#">Kafka Tweets</a>
+</nav>
+
+<div class="container mt-3">
+    <div class="clearfix text-left">
+        <table class="table">
+            <tbody>
+            <tr>
+                <td>
+                    <div class="row">
+                        <div class="form-inline float-left">
+                            <input type="text" class="form-control mb-2 mr-sm-2" size="10" id="searchQuery"
+                                   placeholder="Query">
+                            <button type="submit" id="searchMention" class="btn btn-warning mb-2 ml-1"><i
+                                    class="far fa-user"></i> Search Mention
+                            </button>
+                            <button type="submit" id="searchLocation" class="btn btn-warning mb-2 ml-1"><i
+                                    class="fas fa-location-arrow"></i> Search Location
+                            </button>
+                            <button type="submit" id="searchHashtag" class="btn btn-warning mb-2 ml-1"><i
+                                    class="fas fa-hashtag"></i> Search Hashtag
+                            </button>
+                        </div>
+
+                        <button type="submit" id="sync" class="btn btn-success mb-2 ml-3"><i class="fas fa-sync"></i>
+                            Update
+                        </button>
+
+                        <button type="submit" id="enableLiveUpdate" class="btn btn-success mb-2 ml-1"><i
+                                class="fas fa-heartbeat"></i> Enable Live Update
+                        </button>
+
+                        <button type="submit" id="disableLiveUpdate" class="btn btn-danger mb-2"><i
+                                class="fas fa-heartbeat"></i> Disable Live Update
+                        </button>
+                        <a class="btn btn-primary mb-2 ml-1" data-toggle="collapse"
+                           href="#postTweet" role="button"
+                           aria-expanded="false"><i class="fab fa-twitter"></i> New Tweet</a>
+
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="collapse" id="postTweet">
+                                <div class="card card-body">
+
+                                    <form id="tweetForm">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label>Author</label>
+                                                <input type="text" class="form-control" id="author"
+                                                       placeholder="Author" required>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label>Location</label>
+                                                <input type="text" class="form-control" id="location"
+                                                       placeholder="Milano" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Content</label>
+                                            <input type="text" class="form-control" id="content"
+                                                   placeholder="This project is awesome!" required>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label>Tags
+                                                    <small>(semicolon separated)</small>
+                                                </label>
+                                                <div class="form-group">
+                                                    <input data-role='tags-input' id="tags">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label>Mentions
+                                                    <small>(semicolon separated)</small>
+                                                </label>
+                                                <div class="form-group">
+                                                    <input data-role='tags-input' id="mentions">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success" id="sendTweet"
+                                                aria-expanded="false"><i class="fas fa-share-square"></i> Send
+                                        </button>
+                                    </form>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+
+            <tr>
+                <td><p id="tweetsShowing" class="mb-3"></p>
+                    <span id="tweetsContainer">
+                      <center><b>Choose a Mention, Location or Hashtag :) </b></center>
+                  </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script id="hidden-template" type="text/x-custom-template">
+    <p>
+        <span id="tweetAuthor"><i class="fab fa-twitter mr-1"></i></span>
+        <span id="tweetLocation"><i class="fas fa-map-pin ml-3 mr-1"></i></span>
+        <span id="tweetTimestamp"><i class="far fa-clock  ml-3 mr-1"></i></span>
+        <br/>
+        <small id="tweetContent" class="ml-3"></small>
+        <br/>
+        <span id="tweetTags"><i class="fas fa-hashtag mr-1"></i></span>
+        <span id="tweetMentions"><i class="fas fa-user ml-3 mr-1"></i></span>
+    </p>
+    <hr>
+</script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js"></script>
+<script src="./dist/jquery-tagsinput.min.js" defer></script>
+<script src="./custom.js" defer></script>
+
+
+</body>
+</html>
