@@ -40,7 +40,7 @@ public class TweetPersistance {
         try {
             writer.close();
         } catch (IOException e) {
-            logger.error("Unable to close " + dbFile, e);
+            logger.error("Unable to tearDown " + dbFile, e);
         }
     }
 

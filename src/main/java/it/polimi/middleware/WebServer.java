@@ -1,6 +1,7 @@
 package it.polimi.middleware;
 
 import com.google.gson.Gson;
+import it.polimi.middleware.model.TweetFilter;
 import it.polimi.middleware.model.TweetValue;
 import org.apache.log4j.Logger;
 import spark.Request;
@@ -24,6 +25,7 @@ public class WebServer {
     }
 
     public void start() {
+        webSocket("/tweets/ws", new WebSocketController(consumersOrchestrator));
         staticFiles.location("/");
 
         get("", (request, response) -> {
@@ -64,21 +66,23 @@ public class WebServer {
 
     private String getTweetsFromTopic(Request request, Response response) {
         String keyword = request.params(":keyword").toLowerCase();
-        String filter = request.params(":filter").toLowerCase();
+        String stringFilter = request.params(":filter").toLowerCase();
         String howMany = request.params(":howmany").toLowerCase();
-        response.type("application/json");
+        TweetFilter filter;
 
-        if (!Arrays.asList("location", "tag", "mention").contains(filter) ||
-                !Arrays.asList("all", "latest").contains(howMany)) {
+        //Check if required fields are valid
+        try {
+            filter = TweetFilter.valueOf(stringFilter.toUpperCase());
+        } catch (IllegalArgumentException iae) {
             response.status(404);
             return "{\"message\":\"The filter or quantifier specified is not supported\"}";
         }
 
-        String kafkaTopic = filter + "_" + keyword;
 
-        logger.info("Client wants to read " + howMany + " tweets from topic " + kafkaTopic);
-        TweetConsumer tweetConsumer = consumersOrchestrator.getConsumerPerTopic(kafkaTopic);//Retireve consumer associate to this topic.
+        logger.info("Client wants to read " + howMany + " tweets filter by " + filter + " with keyword " + keyword);
+        TweetConsumer tweetConsumer = consumersOrchestrator.getConsumer(filter, keyword);//Retireve consumer associate to this topic.
 
+        response.type("application/json");
         if (howMany.equals("all")) {
             return gson.toJson(tweetConsumer.getTweetPersistance().readAll());
         } else {

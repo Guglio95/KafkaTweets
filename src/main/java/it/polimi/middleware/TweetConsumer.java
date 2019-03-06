@@ -9,9 +9,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.log4j.Logger;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 class TweetConsumer {
     private static final Logger logger = Logger.getLogger(TweetConsumer.class);
@@ -22,6 +21,7 @@ class TweetConsumer {
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running;
     private Gson gson = new Gson();
+    private Queue<TweetObserver> observers = new ConcurrentLinkedQueue<>();
 
     TweetConsumer(String topic) {
         this.tweetPersistance = new TweetPersistance(topic);
@@ -46,7 +46,7 @@ class TweetConsumer {
             start();
             logger.info("Waiting for consumer to fetch last tweets.");
             try {
-                wait(200);
+                wait(10000);
             } catch (InterruptedException e) {
                 logger.error("Interrupted while waiting for Consumer start", e);
             }
@@ -86,6 +86,9 @@ class TweetConsumer {
                     //Store tweets to our reliable database and sliding window
                     tweetPersistance.write(tweet, record.offset());
                     slidingWindow.store(tweet);
+
+                    //Notify our observers (if any)
+                    observers.forEach(observer -> observer.receive(tweet));
                 }
                 long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
 
@@ -141,5 +144,15 @@ class TweetConsumer {
 
     public SlidingWindow getSlidingWindow() {
         return slidingWindow;
+    }
+
+    public void addObserver(TweetObserver tweetObserver) {
+        observers.add(tweetObserver);
+        logger.info("A new observer has registered to topic "+topic+", now we have "+observers.size()+" observers.");
+    }
+
+    public void removeObserver(TweetObserver tweetObserver) {
+        observers.remove(tweetObserver);
+        logger.info("An observer has gone from topic "+topic+", now we have "+observers.size()+" observers.");
     }
 }
