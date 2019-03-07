@@ -9,7 +9,10 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.log4j.Logger;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class TweetConsumer {
@@ -21,6 +24,7 @@ class TweetConsumer {
     private SlidingWindow slidingWindow;
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running;
+    private boolean hasSpinned;//True if consumer has spinned at least once.
     private Gson gson = new Gson();
     private Queue<TweetObserver> observers = new ConcurrentLinkedQueue<>();
 
@@ -37,9 +41,6 @@ class TweetConsumer {
         coldStart();
         this.running = true;
         new Thread(this::consume).start();
-        synchronized (this) {
-            notifyAll();
-        }
     }
 
     public void blockingStart() {
@@ -47,10 +48,14 @@ class TweetConsumer {
             logger.info("Starting consumer.");
             start();
             logger.info("Waiting for consumer to fetch last tweets.");
-            try {
-                wait(10000);
-            } catch (InterruptedException e) {
-                logger.error("Interrupted while waiting for Consumer start", e);
+
+            //Wait for the consumer to spin at least once; this means that if there are tweets we have downloaded them.
+            while (!hasSpinned) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    logger.error("Interrupted while waiting for Consumer start", e);
+                }
             }
             logger.info("Consumer is ready.");
         }
@@ -96,6 +101,13 @@ class TweetConsumer {
 
                 //Since we have stored the tweet we can commit the increased offset.
                 consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+            }
+
+            if (!hasSpinned) {//Notify that this consumer is ready since has spinned for the first time.
+                hasSpinned = true;
+                synchronized (this){
+                    notifyAll();
+                }
             }
         }
         tearDownKafkaConsumer();
@@ -150,11 +162,11 @@ class TweetConsumer {
 
     public void addObserver(TweetObserver tweetObserver) {
         observers.add(tweetObserver);
-        logger.info("A new observer has registered to topic "+topic+", now we have "+observers.size()+" observers.");
+        logger.info("A new observer has registered to topic " + topic + ", now we have " + observers.size() + " observers.");
     }
 
     public void removeObserver(TweetObserver tweetObserver) {
         observers.remove(tweetObserver);
-        logger.info("An observer has gone from topic "+topic+", now we have "+observers.size()+" observers.");
+        logger.info("An observer has gone from topic " + topic + ", now we have " + observers.size() + " observers.");
     }
 }
