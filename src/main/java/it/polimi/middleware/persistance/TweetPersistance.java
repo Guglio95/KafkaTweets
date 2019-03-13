@@ -71,12 +71,12 @@ public class TweetPersistance {
 
             if (last == null) {
                 logger.info("File " + dbFile + " does not contain an offset because it's empty.");
-                return 0L;
+                return -1L;
             }
             return gson.fromJson(last, TweetValueWithOffset.class).getOffset();
         } catch (IOException e) {
             logger.error("Error reading offset line from " + dbFile, e);
-            return 0L;
+            return -1L;
         }
     }
 

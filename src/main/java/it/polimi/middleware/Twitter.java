@@ -14,6 +14,7 @@ public class Twitter {
             Logger.getRootLogger().fatal("Missing env 'KAFKA1_URL'");
             System.exit(1);
         }
+        Logger.getRootLogger().info("KAFKA1 is at "+kafka1_URL);
 
         //Create dependencies
         final TweetProducer tweetsProducer = new TweetProducer(kafka1_URL);//A single producer can write to any queue

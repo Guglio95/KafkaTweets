@@ -30,9 +30,14 @@ class TweetProducer {
     }
 
     void enqueue(TweetValue tweetValue) {
-        tweetValue.getMentions().stream().filter(m -> m.length() > 0).forEach(mention -> produce("mention_" + mention, 1L, tweetValue));//Publish to mention queue
-        tweetValue.getTags().stream().filter(m -> m.length() > 0).forEach(tag -> produce("tag_" + tag, 1L, tweetValue));//Publish to tag queue
-        produce("location_" + tweetValue.getLocation(), 1L, tweetValue);//Publish to location queue
+        //Publish to mention queue
+        tweetValue.getMentions().stream().filter(m -> m.length() > 0).forEach(mention -> produce("mention_" + mention, 1L, tweetValue));
+
+        //Publish to tag queue
+        tweetValue.getTags().stream().filter(m -> m.length() > 0).forEach(tag -> produce("tag_" + tag, 1L, tweetValue));
+
+        //Publish to location queue
+        produce("location_" + tweetValue.getLocation(), 1L, tweetValue);
     }
 
     void stop() {

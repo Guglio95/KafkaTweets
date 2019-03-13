@@ -74,7 +74,7 @@ public class WebServer {
         try {
             filter = TweetFilter.valueOf(stringFilter.toUpperCase());
         } catch (IllegalArgumentException iae) {
-            response.status(404);
+            response.status(422);
             return "{\"message\":\"The filter or quantifier specified is not supported\"}";
         }
 

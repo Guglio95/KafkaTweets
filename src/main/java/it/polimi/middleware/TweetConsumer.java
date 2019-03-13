@@ -37,13 +37,7 @@ class TweetConsumer {
         this.running = false;
     }
 
-    public void start() {
-        coldStart();
-        this.running = true;
-        new Thread(this::consume).start();
-    }
-
-    public void blockingStart() {
+    void blockingStart() {
         synchronized (this) {
             logger.info("Starting consumer.");
             start();
@@ -61,9 +55,15 @@ class TweetConsumer {
         }
     }
 
+
+    void start() {
+        coldStart();
+        this.running = true;
+        new Thread(this::consume).start();
+    }
+
     private void coldStart() {
         //Read all tweets from local database and load it in sliding window.
-
         tweetPersistance.readAll().forEach(tweetValue -> {
             slidingWindow.store(tweetValue);
             logger.info("Cold start: loading " + tweetValue.toString() + " to sliding window.");
@@ -71,7 +71,7 @@ class TweetConsumer {
 
         //Set consumer offset to stored offset (if any)
         long storedOffset = tweetPersistance.getOffset();
-        if (storedOffset > 0) {
+        if (storedOffset >= 0) {
             //If we have an offset record, we can start reading again from n-th +1 record.
             setUpConsumer(storedOffset + 1);
         } else {
@@ -105,7 +105,8 @@ class TweetConsumer {
 
             if (!hasSpinned) {//Notify that this consumer is ready since has spinned for the first time.
                 hasSpinned = true;
-                synchronized (this){
+                logger.info("Consumer for topic "+topic+" has just spinned for the first time.");
+                synchronized (this) {
                     notifyAll();
                 }
             }

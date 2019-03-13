@@ -24,7 +24,7 @@ public class WebSocketClient implements TweetObserver {
     }
 
     public void tearDown() {
-        //If we have registered to a consumer, de-register from it.
+        //If we are registered to a consumer, de-register from it.
         if (tweetConsumer != null) tweetConsumer.removeObserver(this);
     }
 

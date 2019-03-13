@@ -27,6 +27,7 @@ public class ConsumersOrchestrator {
             TweetConsumer consumer = new TweetConsumer(kafka1_URL, topic);
             consumers.put(topic, consumer);
             consumer.blockingStart();//Wait untill consumer is ready
+            logger.info("Consumer is ready to be used.");
         }
         return consumers.get(topic);
     }
