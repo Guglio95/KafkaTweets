@@ -15,43 +15,80 @@ public class SlidingWindowTest {
         //Test 0
         SlidingWindow slidingWindow = new SlidingWindow(5);
 
-        slidingWindow.store(new TestSlidingWindows(1, "18:00:01"));
-        slidingWindow.store(new TestSlidingWindows(2, "18:01:02"));
-        slidingWindow.store(new TestSlidingWindows(3, "18:02:03"));
-        slidingWindow.store(new TestSlidingWindows(4, "18:03:04"));
-        slidingWindow.store(new TestSlidingWindows(5, "18:01:05"));//Out of seq
-        slidingWindow.store(new TestSlidingWindows(6, "18:04:06"));
-        slidingWindow.store(new TestSlidingWindows(7, "18:05:07"));
-        slidingWindow.store(new TestSlidingWindows(8, "18:06:10"));
-        slidingWindow.store(new TestSlidingWindows(9, "18:04:09"));//Out of seq.
-        slidingWindow.store(new TestSlidingWindows(10, "18:08:50"));
-        slidingWindow.store(new TestSlidingWindows(11, "18:10:10"));//Out of seq
+        slidingWindow.store(new TestElement(1, "18:00:01"));
+        slidingWindow.store(new TestElement(2, "18:01:02"));
+        slidingWindow.store(new TestElement(3, "18:02:03"));
+        slidingWindow.store(new TestElement(4, "18:03:04"));
+        slidingWindow.store(new TestElement(5, "18:01:05"));//Out of seq
+        slidingWindow.store(new TestElement(6, "18:04:06"));
+        slidingWindow.store(new TestElement(7, "18:05:07"));
+        slidingWindow.store(new TestElement(8, "18:06:10"));
+        slidingWindow.store(new TestElement(9, "18:04:09"));//Out of seq.
+        slidingWindow.store(new TestElement(10, "18:08:50"));
+        slidingWindow.store(new TestElement(11, "18:10:10"));
 
-        assertEquals(((TestSlidingWindows) (slidingWindow.getWindow().get(0))).id, 11);
-        assertEquals(((TestSlidingWindows) (slidingWindow.getWindow().get(1))).id, 10);
-        assertEquals(((TestSlidingWindows) (slidingWindow.getWindow().get(2))).id, 8);
-        assertEquals(((TestSlidingWindows) (slidingWindow.getWindow().get(3))).id, 7);
+        //Returned elements are 11,10,8,7
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(0))).id, 11);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(1))).id, 10);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(2))).id, 8);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(3))).id, 7);
         assertEquals((slidingWindow.getWindow().size()), 4);
 
         // Test 2
         slidingWindow = new SlidingWindow(5);
 
-        slidingWindow.store(new TestSlidingWindows(21, "18:00:01"));
-        slidingWindow.store(new TestSlidingWindows(22, "18:01:00"));
-        slidingWindow.store(new TestSlidingWindows(23, "18:10:10"));
-        slidingWindow.store(new TestSlidingWindows(24, "18:09:00"));
-        slidingWindow.store(new TestSlidingWindows(25, "18:01:00"));
-        slidingWindow.store(new TestSlidingWindows(26, "18:39:03"));
+        slidingWindow.store(new TestElement(21, "18:00:01"));
+        slidingWindow.store(new TestElement(22, "18:01:00"));
+        slidingWindow.store(new TestElement(23, "18:10:10"));
+        slidingWindow.store(new TestElement(24, "18:09:00"));
+        slidingWindow.store(new TestElement(25, "18:01:00"));
+        slidingWindow.store(new TestElement(26, "18:39:03"));
 
-        assertEquals(((TestSlidingWindows) (slidingWindow.getWindow().get(0))).id, 26);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(0))).id, 26);
         assertEquals((slidingWindow.getWindow().size()), 1);
+
+
+        //Test 3
+        slidingWindow = new SlidingWindow(5);
+
+        slidingWindow.store(new TestElement(21, "18:00:01"));
+        slidingWindow.store(new TestElement(22, "18:01:00"));
+        slidingWindow.store(new TestElement(23, "18:10:10"));
+        slidingWindow.store(new TestElement(24, "18:09:00"));
+        slidingWindow.store(new TestElement(25, "18:01:00"));
+
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(0))).id, 23);
+        assertEquals((slidingWindow.getWindow().size()), 1);
+
+
+        //Test 4
+        slidingWindow = new SlidingWindow(5);
+
+        slidingWindow.store(new TestElement(21, "18:00:10"));
+        slidingWindow.store(new TestElement(22, "18:00:00"));
+        slidingWindow.store(new TestElement(23, "18:01:10"));
+        slidingWindow.store(new TestElement(24, "18:05:05"));
+        slidingWindow.store(new TestElement(25, "18:03:00"));
+        slidingWindow.store(new TestElement(25, "18:05:00"));
+
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(0))).id, 25);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(1))).id, 24);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(2))).id, 23);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(3))).id, 22);
+        assertEquals(((TestElement) (slidingWindow.getWindow().get(4))).id, 21);
+        assertEquals((slidingWindow.getWindow().size()), 5);
+
+
     }
 
-    private class TestSlidingWindows implements TimestampedEvent {
+    /**
+     * Test element to push on sliding window
+     */
+    private class TestElement implements TimestampedEvent {
         private int id;
         private long timestamp;
 
-        public TestSlidingWindows(int id, String timestamp) {
+        public TestElement(int id, String timestamp) {
             String pattern = "yyyy-MM-dd HH:mm:ss";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
             Date date = null;
@@ -75,7 +112,7 @@ public class SlidingWindowTest {
             Date date = new java.util.Date(timestamp * 1000L);
             SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
-            return "TestSlidingWindows{" +
+            return "TestElement{" +
                     "id=" + id +
                     ", timestamp=" + sdf.format(date) +
                     '}';
