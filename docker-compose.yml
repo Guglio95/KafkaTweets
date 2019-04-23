@@ -6,7 +6,7 @@ services:
     build: ./
     container_name: kafkaTweets
     environment:
-      - KAFKA1_URL=kafka1:19092
+      - KAFKA1_URL=kafka1:19092,kafka2:19093,kafka3:19094
     restart: always
     ports:
       - "4567:4567"
@@ -41,6 +41,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_NUM_PARTITIONS: 5
     volumes:
       - ./zk-single-kafka-multiple/kafka1/data:/var/lib/kafka/data
     depends_on:
@@ -59,6 +60,7 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_NUM_PARTITIONS: 5
     volumes:
       - ./zk-single-kafka-multiple/kafka2/data:/var/lib/kafka/data
     depends_on:
@@ -78,6 +80,7 @@ services:
       KAFKA_BROKER_ID: 3
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_NUM_PARTITIONS: 5
     volumes:
       - ./zk-single-kafka-multiple/kafka3/data:/var/lib/kafka/data
     depends_on:

@@ -17,17 +17,20 @@ public class WebSocketController {
     private static final Logger logger = Logger.getLogger(WebSocketController.class);
 
     private final ConsumersOrchestrator consumersOrchestrator;//dependency
+    private final TweetProducer producer;//dependency
+
     private final Map<Session, WebSocketClient> connectedUsers = new ConcurrentHashMap<>();//Connected users
 
-    WebSocketController(ConsumersOrchestrator consumersOrchestrator) {
+    WebSocketController(ConsumersOrchestrator consumersOrchestrator, TweetProducer producer) {
         this.consumersOrchestrator = consumersOrchestrator;
+        this.producer = producer;
     }
 
     @OnWebSocketConnect
     public void connected(Session session) {
         logger.info("A new client has connected via WS.");
         //Create a new user object when a new connection occurs.
-        connectedUsers.put(session, new WebSocketClient(consumersOrchestrator, session));
+        connectedUsers.put(session, new WebSocketClient(consumersOrchestrator, producer, session));
     }
 
     @OnWebSocketClose

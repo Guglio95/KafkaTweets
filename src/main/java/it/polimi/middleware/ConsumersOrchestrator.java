@@ -36,10 +36,9 @@ public class ConsumersOrchestrator {
      * Retrieves the consumer associated to given filter and query.
      *
      * @param filter
-     * @param query
      * @return
      */
-    public TweetConsumer getConsumer(TweetFilter filter, String query) {
-        return getConsumerPerTopic(filter + "_" + query.toLowerCase());
+    public TweetConsumer getConsumer(TweetFilter filter) {
+        return getConsumerPerTopic(filter.toString());
     }
 }

@@ -1,6 +1,7 @@
 package it.polimi.middleware;
 
 import com.google.gson.Gson;
+import it.polimi.middleware.model.TweetFilter;
 import it.polimi.middleware.model.TweetValue;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -23,21 +24,40 @@ class TweetProducer {
         this.producer = createProducer();
     }
 
-    private void produce(String topic, Long key, TweetValue value) {
-        logger.info("Publishing to topic "+topic.toLowerCase()+" the content "+value.toString());
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic.toLowerCase(), key + "", gson.toJson(value));
+    private void produce(TweetFilter tweetFilter, String key, TweetValue value) {
+        logger.info("Publishing to topic " + getTopic(tweetFilter) + " the content " + value.toString());
+        ProducerRecord<String, String> record = new ProducerRecord<>(getTopic(tweetFilter), key, gson.toJson(value));
         this.producer.send(record);
     }
 
-    void enqueue(TweetValue tweetValue) {
-        //Publish to mention queue
-        tweetValue.getMentions().stream().filter(m -> m.length() > 0).forEach(mention -> produce("mention_" + mention, 1L, tweetValue));
+    private void produce(TweetFilter tweetFilter, String key, TweetValue value, int partition) {
+        logger.info("Publishing to topic " + getTopic(tweetFilter) + " partition " + partition + " the content " + value.toString());
+        ProducerRecord<String, String> record = new ProducerRecord<>(getTopic(tweetFilter), partition, key, gson.toJson(value));
+        this.producer.send(record);
+    }
 
-        //Publish to tag queue
-        tweetValue.getTags().stream().filter(m -> m.length() > 0).forEach(tag -> produce("tag_" + tag, 1L, tweetValue));
+
+    void enqueue(TweetValue tweetValue) {
+        //Publish to partition for each mention.
+        tweetValue.getMentions().stream()
+                .filter(m -> m.length() > 0)
+                .map(key -> CustomPartitioner.partition(partitionsPerTopic(TweetFilter.MENTION), key))
+                .distinct()
+                .forEach(partition -> produce(TweetFilter.MENTION, "key", tweetValue, partition));
+
+        //Publish to partition for each tag
+        tweetValue.getTags().stream()
+                .filter(m -> m.length() > 0)
+                .map(key -> CustomPartitioner.partition(partitionsPerTopic(TweetFilter.TAG), key))
+                .distinct()
+                .forEach(partition -> produce(TweetFilter.TAG, "key", tweetValue, partition));
 
         //Publish to location queue
-        produce("location_" + tweetValue.getLocation(), 1L, tweetValue);
+        produce(TweetFilter.LOCATION, tweetValue.getLocation(), tweetValue);
+    }
+
+    int partitionsPerTopic(TweetFilter tag) {
+        return producer.partitionsFor(getTopic(tag)).size();
     }
 
     void stop() {
@@ -49,15 +69,17 @@ class TweetProducer {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka1_URL);
 
-//        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-//        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-//        props.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, CustomPartitioner.class.getName());
+
 
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
 
         return new KafkaProducer<>(props);
+    }
+
+    private String getTopic(TweetFilter tweetFilter) {
+        return tweetFilter.toString().toLowerCase();
     }
 }

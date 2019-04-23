@@ -40,6 +40,19 @@ public class TweetValue implements TimestampedEvent {
                 Objects.equals(mentions, that.mentions);
     }
 
+
+    public boolean isPertinent(TweetFilter filter, String keyword) {
+        switch (filter) {
+            case TAG:
+                return getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(keyword.toLowerCase()));
+            case MENTION:
+                return getMentions().stream().anyMatch(tag -> tag.toLowerCase().contains(keyword.toLowerCase()));
+            case LOCATION:
+                return getLocation().toLowerCase().contains(keyword.toLowerCase());
+        }
+        return false;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(author, content, timestamp, location, tags, mentions);

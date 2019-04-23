@@ -10,4 +10,6 @@ public enum TweetFilter {
     public String toString() {
         return super.toString().toLowerCase();
     }
+
+
 }

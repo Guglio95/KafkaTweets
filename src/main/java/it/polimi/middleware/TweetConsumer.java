@@ -2,36 +2,35 @@ package it.polimi.middleware;
 
 import com.google.gson.Gson;
 import it.polimi.middleware.model.TweetValue;
-import it.polimi.middleware.persistance.TweetPersistance;
+import it.polimi.middleware.persistance.TopicPersistance;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.log4j.Logger;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 class TweetConsumer {
     private static final Logger logger = Logger.getLogger(TweetConsumer.class);
 
-    private final String kafka1_URL;
+    private final String kafkaURL;
     private String topic;
-    private TweetPersistance tweetPersistance;
-    private SlidingWindow slidingWindow;
+
+    private TopicPersistance topicPersistance;
+    private Map<Integer, SlidingWindow> slidingWindows;
     private KafkaConsumer<String, String> consumer;
+
     private volatile boolean running;
     private boolean hasSpinned;//True if consumer has spinned at least once.
     private Gson gson = new Gson();
-    private Queue<TweetObserver> observers = new ConcurrentLinkedQueue<>();
+    private Map<Integer, Set<TweetObserver>> partitionsObservers = new ConcurrentHashMap<>();
 
-    TweetConsumer(String kafka1_URL, String topic) {
-        this.kafka1_URL = kafka1_URL;
-        this.tweetPersistance = new TweetPersistance(topic);
-        this.slidingWindow = new SlidingWindow(5);
+    TweetConsumer(String kafkaURL, String topic) {
+        this.kafkaURL = kafkaURL;
+        this.topicPersistance = new TopicPersistance(topic);
+        this.slidingWindows = new HashMap<>();
         this.topic = topic;
         this.consumer = createKafkaConsumer();
         this.running = false;
@@ -63,21 +62,34 @@ class TweetConsumer {
     }
 
     private void coldStart() {
-        //Read all tweets from local database and load it in sliding window.
-        tweetPersistance.readAll().forEach(tweetValue -> {
-            slidingWindow.store(tweetValue);
-            logger.info("Cold start: loading " + tweetValue.toString() + " to sliding window.");
-        });
+        this.consumer.subscribe(Collections.singletonList(topic));
+        consumer.poll(1);
 
-        //Set consumer offset to stored offset (if any)
-        long storedOffset = tweetPersistance.getOffset();
-        if (storedOffset >= 0) {
-            //If we have an offset record, we can start reading again from n-th +1 record.
-            setUpConsumer(storedOffset + 1);
-        } else {
-            //If offset is not set we can start seeking from the beginning.
-            setUpConsumer(0);
-        }
+        consumer.assignment().forEach(topicPartition -> {
+
+            //Set the offset for each partition.
+            Long lastCommittedOffset = topicPersistance.getOffset(topicPartition.partition());
+            if (lastCommittedOffset == null) {
+                lastCommittedOffset = 0L; // Offset was never committed.
+            } else {
+                lastCommittedOffset += 1L; // Offset was committed last time; start reading from offset+1
+
+            }
+            consumer.seek(topicPartition, lastCommittedOffset);
+            logger.info("Setting offset to " + lastCommittedOffset + " per partition " + topicPartition.partition());
+
+            //Create a new sliding windows for this partition.
+            final SlidingWindow slidingWindow = new SlidingWindow(5);
+            slidingWindows.put(topicPartition.partition(), slidingWindow);
+
+            //Load all the previously red tweets in the sliding window.
+            topicPersistance.readAllTweets(topicPartition.partition())
+                    .forEach(tweetValue -> {
+                        slidingWindow.store(tweetValue);
+                        logger.info("Cold start: loading " + tweetValue.toString() + " to sliding window per " +
+                                "partition " + topicPartition.partition());
+                    });
+        });
     }
 
     private void consume() {
@@ -87,17 +99,21 @@ class TweetConsumer {
             for (TopicPartition partition : records.partitions()) {
                 List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
                 for (ConsumerRecord<String, String> record : partitionRecords) {
-                    logger.info("Found at offset: '" + record.offset() + "' content: '" + record.value() + "'");
+                    logger.info("Partition '" + record.partition() + "' found at offset '" + record.offset() +
+                            "' content: '" + record.value() + "'");
+
+                    //Deserialize the received tweet.
                     TweetValue tweet = gson.fromJson(record.value(), TweetValue.class);
 
                     //Store tweets to our reliable database and sliding window
-                    tweetPersistance.write(tweet, record.offset());
-                    slidingWindow.store(tweet);
+                    topicPersistance.storeTweet(tweet, record.partition(), record.offset());
+                    slidingWindows.get(record.partition()).store(tweet);
 
-                    //Notify our observers (if any)
-                    observers.forEach(observer -> observer.receive(tweet));
+                    //Notify our partitionsObservers (if any)
+                    if (partitionsObservers.containsKey(record.partition()))
+                        partitionsObservers.get(record.partition()).forEach(observer -> observer.receive(tweet));
                 }
-                long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+                long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();//Offset of the last received record
 
                 //Since we have stored the tweet we can commit the increased offset.
                 consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
@@ -105,7 +121,7 @@ class TweetConsumer {
 
             if (!hasSpinned) {//Notify that this consumer is ready since has spinned for the first time.
                 hasSpinned = true;
-                logger.info("Consumer for topic "+topic+" has just spinned for the first time.");
+                logger.info("Consumer for topic " + topic + " has just spinned for the first time");
                 synchronized (this) {
                     notifyAll();
                 }
@@ -114,19 +130,8 @@ class TweetConsumer {
         tearDownKafkaConsumer();
     }
 
-
     void stop() {
         this.running = false;
-    }
-
-    private void setUpConsumer(long readOffset) {
-        this.consumer.subscribe(Collections.singletonList(topic));
-        consumer.poll(1);
-
-        consumer.assignment().forEach(topicPartition -> {
-            consumer.seek(topicPartition, readOffset);
-            logger.info("Setting offset to " + readOffset + " per partition " + topicPartition.topic());
-        });
     }
 
     private void tearDownKafkaConsumer() {
@@ -135,14 +140,9 @@ class TweetConsumer {
 
     private KafkaConsumer<String, String> createKafkaConsumer() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka1_URL);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "consgroup1");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaURL);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + topic);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-//        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroDeserializer");
-//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroDeserializer");
-//        props.put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-//        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
 
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -153,21 +153,27 @@ class TweetConsumer {
         return new KafkaConsumer<>(props);
     }
 
-    public TweetPersistance getTweetPersistance() {
-        return tweetPersistance;
+    TopicPersistance getTopicPersistance() {
+        return topicPersistance;
     }
 
-    public SlidingWindow getSlidingWindow() {
-        return slidingWindow;
+    Map<Integer, SlidingWindow> getSlidingWindows() {
+        return slidingWindows;
     }
 
-    public void addObserver(TweetObserver tweetObserver) {
-        observers.add(tweetObserver);
-        logger.info("A new observer has registered to topic " + topic + ", now we have " + observers.size() + " observers.");
+    void addObserver(TweetObserver tweetObserver, int partitionId) {
+        partitionsObservers.putIfAbsent(partitionId, ConcurrentHashMap.newKeySet());
+        partitionsObservers.get(partitionId).add(tweetObserver);
+
+        logger.info("A new observer has registered to topic " + topic + ", now in partition " + partitionId + " we have "
+                + partitionsObservers.get(partitionId).size() + " partitionsObservers.");
     }
 
-    public void removeObserver(TweetObserver tweetObserver) {
-        observers.remove(tweetObserver);
-        logger.info("An observer has gone from topic " + topic + ", now we have " + observers.size() + " observers.");
+    void removeObserver(TweetObserver tweetObserver) {
+        partitionsObservers.forEach((partitionID, observerSet) -> {
+            if (observerSet.remove(tweetObserver))
+                logger.info("An observer has gone from topic " + topic + " now in partition " + partitionID
+                        + " we have " + observerSet.size() + " partitionsObservers");
+        });
     }
 }

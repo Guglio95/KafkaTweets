@@ -10,11 +10,11 @@ public class SlidingWindow {
     private long lastTimestamp = Long.MIN_VALUE;
     int lastKeyWritten = 0;
 
-    public SlidingWindow(int minutes) {
+    SlidingWindow(int minutes) {
         this.window = new List[minutes + 1];
     }
 
-    public void store(TimestampedEvent event) {
+    synchronized void store(TimestampedEvent event) {
         int key = (int) ((event.getTimestamp() / 60) % this.window.length);
 
         //If we are in the same minute, append to the existing list.
@@ -60,7 +60,7 @@ public class SlidingWindow {
         }
     }
 
-    public List<TimestampedEvent> getWindow() {
+    List<TimestampedEvent> getWindow() {
         //Cycle each slot of the array starting from the last written:
         //Example: if last written slot is "2" and array has lenght=5 the visiting will be: 2,1,0,4,3
         List<TimestampedEvent> out = new ArrayList<>();

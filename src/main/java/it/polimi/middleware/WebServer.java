@@ -25,7 +25,7 @@ public class WebServer {
     }
 
     public void start() {
-        webSocket("/tweets/ws", new WebSocketController(consumersOrchestrator));
+        webSocket("/tweets/ws", new WebSocketController(consumersOrchestrator, producer));
         staticFiles.location("html");
 
         get("", (request, response) -> {
@@ -35,7 +35,7 @@ public class WebServer {
 
         path("/tweets", () -> {
             post("", this::postNewTweet);
-            get("/:filter/:keyword/:howmany", this::getTweetsFromTopic);
+            get("/:isTweetPertinent/:keyword/:howmany", this::getTweetsFromTopic);
         });
 
         //CORS
@@ -66,7 +66,7 @@ public class WebServer {
 
     private String getTweetsFromTopic(Request request, Response response) {
         String keyword = request.params(":keyword").toLowerCase();
-        String stringFilter = request.params(":filter").toLowerCase();
+        String stringFilter = request.params(":isTweetPertinent").toLowerCase();
         String howMany = request.params(":howmany").toLowerCase();
         TweetFilter filter;
 
@@ -75,20 +75,27 @@ public class WebServer {
             filter = TweetFilter.valueOf(stringFilter.toUpperCase());
         } catch (IllegalArgumentException iae) {
             response.status(422);
-            return "{\"message\":\"The filter or quantifier specified is not supported\"}";
+            return "{\"message\":\"The isTweetPertinent or quantifier specified is not supported\"}";
         }
 
 
-        logger.info("Client wants to read " + howMany + " tweets filter by " + filter + " with keyword " + keyword);
-        TweetConsumer tweetConsumer = consumersOrchestrator.getConsumer(filter, keyword);//Retireve consumer associate to this topic.
+        TweetConsumer tweetConsumer = consumersOrchestrator.getConsumer(filter);//Retireve consumer associate to this topic.
+        int partitionId = CustomPartitioner.partition(producer.partitionsPerTopic(filter), keyword);
+        logger.info("Client wants to read " + howMany + " tweets by " + filter + " with keyword " + keyword
+                + ", we want partition " + partitionId);
 
         response.type("application/json");
         if (howMany.equals("all")) {
-            return gson.toJson(tweetConsumer.getTweetPersistance().readAll());
-        } else {
-            return gson.toJson(tweetConsumer.getSlidingWindow().getWindow());
+            return gson.toJson(tweetConsumer.getTopicPersistance().readAllTweets(partitionId));
         }
+
+        return gson.toJson(
+                tweetConsumer.getSlidingWindows().get(partitionId).getWindow().stream()
+                        .filter(tweet -> ((TweetValue) tweet).isPertinent(filter, keyword))
+                        .collect(Collectors.toList()));
+
     }
+
 
     private String postNewTweet(Request request, Response response) {
         //Check existence of all fields
