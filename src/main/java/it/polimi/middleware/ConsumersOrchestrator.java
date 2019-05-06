@@ -4,11 +4,13 @@ import it.polimi.middleware.model.TweetFilter;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConsumersOrchestrator {
     private static final Logger logger = Logger.getLogger(ConsumersOrchestrator.class);
 
-    private final HashMap<String, TweetConsumer> consumers = new HashMap<>();
+    private final Map<String, TweetConsumer> consumers = new ConcurrentHashMap<>();
     private final String kafka1_URL;
 
     public ConsumersOrchestrator(String kafka1_URL) {

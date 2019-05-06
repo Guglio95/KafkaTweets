@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class WebSocketClient implements TweetObserver {
     private static final Logger logger = Logger.getLogger(WebSocketClient.class);
@@ -58,7 +59,12 @@ public class WebSocketClient implements TweetObserver {
         int partitionId = CustomPartitioner.partition(producer.partitionsPerTopic(filter), query);
 
         //Get and push sliding window to client.
-        session.getRemote().sendString(gson.toJson(tweetConsumer.getSlidingWindows().get(partitionId).getWindow()));
+        session.getRemote().sendString(
+                gson.toJson(tweetConsumer.getSlidingWindows().get(partitionId).getWindow().stream()
+                        .filter(tweet -> ((TweetValue) tweet).isPertinent(filter, query))
+                        .collect(Collectors.toList())
+                )
+        );
 
         //Register as an observer to that consumer.
         tweetConsumer.addObserver(this, partitionId);
