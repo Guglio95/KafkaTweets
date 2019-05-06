@@ -117,6 +117,7 @@ $(document).ready(function() {
     ws.onmessage = function(event) {
         //Array of tweets is parsed from json and reversed since every bunch of tweets we receive
         //is ordered starting from the newest one.
+        $("#tweetsContainer").html("");
         addTweets(JSON.parse(event.data).reverse(), false);
     }
 

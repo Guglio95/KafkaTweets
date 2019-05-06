@@ -111,7 +111,7 @@ class TweetConsumer {
 
                     //Notify our partitionsObservers (if any)
                     if (partitionsObservers.containsKey(record.partition()))
-                        partitionsObservers.get(record.partition()).forEach(observer -> observer.receive(tweet));
+                        partitionsObservers.get(record.partition()).forEach(TweetObserver::newTweetReceived);
                 }
                 long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();//Offset of the last received record
 

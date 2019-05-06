@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -27,6 +26,7 @@ public class WebSocketClient implements TweetObserver {
     private String choosenQuery;
 
     private static AtomicInteger globalClientId = new AtomicInteger();
+    private int choosenPartitionId;
 
     WebSocketClient(ConsumersOrchestrator consumersOrchestrator, TweetProducer producer, Session session) {
         this.consumersOrchestrator = consumersOrchestrator;
@@ -48,7 +48,7 @@ public class WebSocketClient implements TweetObserver {
      * @param query
      * @throws IOException
      */
-    void onMessage(TweetFilter filter, String query) throws IOException {
+    void onMessage(TweetFilter filter, String query) {
         //If we are already registered to a consumer, de-register from it.
         if (tweetConsumer != null) tweetConsumer.removeObserver(this);
 
@@ -58,36 +58,42 @@ public class WebSocketClient implements TweetObserver {
         //Get partition in which we are interested
         int partitionId = CustomPartitioner.partition(producer.partitionsPerTopic(filter), query);
 
-        //Get and push sliding window to client.
-        session.getRemote().sendString(
-                gson.toJson(tweetConsumer.getSlidingWindows().get(partitionId).getWindow().stream()
-                        .filter(tweet -> ((TweetValue) tweet).isPertinent(filter, query))
-                        .collect(Collectors.toList())
-                )
-        );
+
+        //Update values
+        this.choosenFilter = filter;
+        this.choosenQuery = query;
+        this.choosenPartitionId = partitionId;
+
+        //Push sliding window to client.
+        sendSlidingWindow();
 
         //Register as an observer to that consumer.
         tweetConsumer.addObserver(this, partitionId);
-
-        this.choosenFilter = filter;
-        this.choosenQuery = query;
     }
+
 
     /**
      * Callback called from TweetConsumer when a new tweet has arrived on observed partition.
-     *
-     * @param tweetValue
-     */
+     **/
     @Override
-    public void receive(TweetValue tweetValue) {
+    public void newTweetReceived() {
         logger.info("Received a new tweet from TweetConsumer.");
-        //Send it to the client only if it's pertinent.
-        if (tweetValue.isPertinent(choosenFilter, choosenQuery))
-            try {
-                session.getRemote().sendString(gson.toJson(Collections.singleton(tweetValue)));
-            } catch (IOException e) {
-                logger.error("Error while sending new tweet to client", e);
-            }
+
+        //Send sliding window to the client.
+        sendSlidingWindow();
+    }
+
+    private void sendSlidingWindow() {
+        try {
+            session.getRemote().sendString(
+                    gson.toJson(tweetConsumer.getSlidingWindows().get(choosenPartitionId).getWindow().stream()
+                            .filter(tweet -> ((TweetValue) tweet).isPertinent(choosenFilter, choosenQuery))
+                            .collect(Collectors.toList())
+                    )
+            );
+        } catch (IOException e) {
+            logger.fatal("Error sending sliding window", e);
+        }
     }
 
     @Override

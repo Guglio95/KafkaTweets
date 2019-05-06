@@ -4,18 +4,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class TweetValue implements TimestampedEvent {
+public class TweetValue extends TimestampedEvent {
     private String author;
     private String content;
-    private long timestamp;
     private String location;
     private List<String> tags = Collections.emptyList();
     private List<String> mentions = Collections.emptyList();
 
     public TweetValue(String author, String content, long timestamp, String location) {
+        super(timestamp);
         this.author = author;
         this.content = content;
-        this.timestamp = timestamp;
         this.location = location;
     }
 
@@ -32,7 +31,7 @@ public class TweetValue implements TimestampedEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TweetValue that = (TweetValue) o;
-        return timestamp == that.timestamp &&
+        return getTimestamp() == that.getTimestamp() &&
                 Objects.equals(author, that.author) &&
                 Objects.equals(content, that.content) &&
                 Objects.equals(location, that.location) &&
@@ -55,7 +54,7 @@ public class TweetValue implements TimestampedEvent {
 
     @Override
     public int hashCode() {
-        return Objects.hash(author, content, timestamp, location, tags, mentions);
+        return Objects.hash(author, content, getTimestamp(), location, tags, mentions);
     }
 
     public String getAuthor() {
@@ -72,15 +71,6 @@ public class TweetValue implements TimestampedEvent {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @Override
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getLocation() {

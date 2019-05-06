@@ -41,7 +41,7 @@ public class WebSocketController {
     }
 
     @OnWebSocketMessage
-    public void message(Session session, String message) throws IOException {
+    public void message(Session session, String message) {
         //First retrieve filter and query.
         TweetFilter filter;
         try {
