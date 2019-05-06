@@ -132,7 +132,7 @@ public class WebServer {
         }
 
         //Enqueue new tweet
-        producer.enqueue(tweetValue);
+        producer.produce(tweetValue);
         return "OK";
     }
 
