@@ -34,12 +34,10 @@ public class SlidingWindow {
         }
     }
 
-    synchronized void slide(long closeTime) {
-        if(closeTime > this.closeTime) {
-            this.closeTime = closeTime;
-            this.openTime = this.closeTime - size;
-            removeOldEvents();
-        }
+    synchronized void slide() {
+        this.closeTime = System.currentTimeMillis();
+        this.openTime = this.closeTime - size;
+        removeOldEvents();
     }
 
     synchronized List<TimestampedEvent> getWindow() {
@@ -76,7 +74,7 @@ public class SlidingWindow {
             try {
                 while (running) {
                     Thread.sleep(hop);
-                    window.slide(System.currentTimeMillis());
+                    window.slide();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
