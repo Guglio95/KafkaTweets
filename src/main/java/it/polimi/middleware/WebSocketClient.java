@@ -8,12 +8,16 @@ import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class WebSocketClient implements TweetObserver {
     private static final Logger logger = Logger.getLogger(WebSocketClient.class);
     private Gson gson = new Gson();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private int clientId;
 
@@ -24,21 +28,26 @@ public class WebSocketClient implements TweetObserver {
     private TweetConsumer tweetConsumer;//Tweet consumer which is serving us.
     private TweetFilter choosenFilter;
     private String choosenQuery;
+    private int choosenPartitionId;
 
     private static AtomicInteger globalClientId = new AtomicInteger();
-    private int choosenPartitionId;
+
 
     WebSocketClient(ConsumersOrchestrator consumersOrchestrator, TweetProducer producer, Session session) {
         this.consumersOrchestrator = consumersOrchestrator;
         this.producer = producer;
         this.session = session;
         this.clientId = globalClientId.incrementAndGet();
+
+        scheduler.scheduleAtFixedRate(this::sendSlidingWindow, 30, 30, TimeUnit.SECONDS);
+
         logger.info("Created a new WebSocketClient with ID=" + clientId);
     }
 
     public void tearDown() {
         //If we are registered to a consumer, de-register from it.
         if (tweetConsumer != null) tweetConsumer.removeObserver(this);
+        scheduler.shutdown();
     }
 
     /**
@@ -84,6 +93,7 @@ public class WebSocketClient implements TweetObserver {
     }
 
     private void sendSlidingWindow() {
+        if (choosenFilter == null || choosenQuery == null || tweetConsumer == null) return;
         try {
             session.getRemote().sendString(
                     gson.toJson(tweetConsumer.getSlidingWindows().get(choosenPartitionId).getWindow().stream()
