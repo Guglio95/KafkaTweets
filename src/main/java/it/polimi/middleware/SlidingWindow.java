@@ -2,36 +2,89 @@ package it.polimi.middleware;
 
 import it.polimi.middleware.model.TimestampedEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.util.*;
 
 public class SlidingWindow {
-    private List<TimestampedEvent> eventsList = new ArrayList<>();
-    int windowSizeInMinutes;
+    private Set<TimestampedEvent> events;
+    private long size;
+    private long hop;
+    private long openTime;
+    private long closeTime;
+    private SlidingWindowTrigger trigger;
 
-    SlidingWindow(int windowSizeInMinutes) {
-        this.windowSizeInMinutes = windowSizeInMinutes;
+    SlidingWindow(Duration size, Duration hop) {
+        this.events = new TreeSet<>(Comparator.comparingLong(TimestampedEvent::getTimestamp));
+        this.size = size.toMillis();
+        this.hop = hop.toMillis();
+        this.closeTime = System.currentTimeMillis();
+        this.openTime = this.closeTime - this.size;
+        this.trigger = new SlidingWindowTrigger(this.hop, this);
+        this.trigger.start();
     }
 
     synchronized void store(TimestampedEvent event) {
-        //Add event to windows if this happened in last X minutes.
-        if (event.getTimestamp() > timestampMinutesAgo(windowSizeInMinutes)) {
-            eventsList.add(event);
+        if (event.getTimestamp() > this.openTime) {
+            events.add(event);
+            if (event.getTimestamp() > this.closeTime) {
+                this.closeTime = event.getTimestamp();
+                this.openTime = this.closeTime - openTime;
+                removeOldEvents();
+            }
+        }
+    }
+
+    synchronized void slide(long closeTime) {
+        if(closeTime > this.closeTime) {
+            this.closeTime = closeTime;
+            this.openTime = this.closeTime - size;
+            removeOldEvents();
         }
     }
 
     synchronized List<TimestampedEvent> getWindow() {
-        removeOldEntries();
-        eventsList.sort((t0, t1) -> (int) (t1.getTimestamp() - t0.getTimestamp()));
-        return new ArrayList<>(eventsList);
+        return new ArrayList<>(events);
     }
 
-    private void removeOldEntries() {
+    void stop() {
+        try {
+            this.trigger.terminate();
+            this.trigger.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeOldEvents() {
         //Remove events older then X minutes.
-        eventsList.removeIf(timestampedEvent -> timestampedEvent.getTimestamp() < timestampMinutesAgo(windowSizeInMinutes));
+        events.removeIf(timestampedEvent -> timestampedEvent.getTimestamp() < this.openTime);
     }
 
-    private long timestampMinutesAgo(int minutes) {
-        return System.currentTimeMillis() / 1000L - minutes * 60;
+    private static class SlidingWindowTrigger extends Thread {
+        private long hop;
+        private SlidingWindow window;
+        private volatile boolean running;
+
+        SlidingWindowTrigger(long hop, SlidingWindow window) {
+            this.hop = hop;
+            this.window = window;
+            this.running = true;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (running) {
+                    Thread.sleep(hop);
+                    window.slide(System.currentTimeMillis());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void terminate() {
+            this.running = false;
+        }
     }
 }

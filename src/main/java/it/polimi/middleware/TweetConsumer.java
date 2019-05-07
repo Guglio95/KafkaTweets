@@ -79,7 +79,7 @@ class TweetConsumer {
             logger.info("Setting offset to " + lastCommittedOffset + " per partition " + topicPartition.partition());
 
             //Create a new sliding windows for this partition.
-            final SlidingWindow slidingWindow = new SlidingWindow(5);
+            final SlidingWindow slidingWindow = new SlidingWindow(Duration.ofMinutes(5), Duration.ofSeconds(10));
             slidingWindows.put(topicPartition.partition(), slidingWindow);
 
             //Load all the previously red tweets in the sliding window.
